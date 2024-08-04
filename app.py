@@ -58,7 +58,7 @@ def render_query(query, variables, parsed_variables):
     return rendered
 
 def main():
-    st.title("SQL Query Editor with Jinja Variable Rendering")
+    st.title("SQL Jinja Renderer")
 
     # Create two columns
     col1, col2 = st.columns([0.8, 0.2])
@@ -70,23 +70,24 @@ def main():
                                  height=300, 
                                  placeholder="Enter your SQL query here. Use {{ variable_name }} or {{ object.property }} for Jinja variables.")
 
-        # Parameters Input
-        # Parameters parent input
-        params_parent = st.text_input("Parameters parent", 
-                                    placeholder="Enter parent object for parameters or leave blank for top-level parameters")
-        params_input = st.text_area("Paste Python-style Parameters", 
-                                    height=100, 
-                                    placeholder='Example: {"entity": "italy", "date": 2032}')
+        # Parameters Input (in a collapsible section)
+        with st.expander("Python-style Parameters"):
+            # Parameters parent input
+            params_parent = st.text_input("Parameters parent", 
+                                        placeholder="Enter parent object for parameters or leave blank for top-level parameters")
+            params_input = st.text_area("Paste Python-style Parameters", 
+                                        height=100, 
+                                        placeholder='{"entity": "italy", "date": 2032}')
 
-        # Parse Parameters
-        if st.button("Parse Parameters"):
-            try:
-                parsed_params = json.loads(params_input.replace("'", '"'))
-                st.session_state['parsed_params'] = parsed_params
-                st.session_state['params_parent'] = params_parent
-                st.success("Parameters parsed successfully!")
-            except json.JSONDecodeError:
-                st.error("Error parsing parameters. Please check your input format.")
+            # Parse Parameters
+            if st.button("Parse Parameters"):
+                try:
+                    parsed_params = json.loads(params_input.replace("'", '"'))
+                    st.session_state['parsed_params'] = parsed_params
+                    st.session_state['params_parent'] = params_parent
+                    st.success("Parameters parsed successfully!")
+                except json.JSONDecodeError:
+                    st.error("Error parsing parameters. Please check your input format.")
 
         # Render Query Button
         render_button = st.button("Render Query")
@@ -137,7 +138,7 @@ def main():
     if render_button:
         rendered_query = render_query(sql_query, updated_variables, parsed_variables)
         st.subheader("Rendered Query")
-        st.text_area("", value=rendered_query, height=200)
+        st.code(rendered_query, language="sql")
 
 if __name__ == "__main__":
     main()
